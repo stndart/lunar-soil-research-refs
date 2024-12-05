@@ -1,16 +1,38 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 import re
+from functools import partial
+from typing import Callable
 
 @dataclass
 class Author:
     Name: str
     Initials: str
+    Affiliations: list[str] = field(default_factory=list)
 
     def __hash__(self):
         return (self.Name + self.Initials).__hash__()
     
+    def __eq__(self, other: 'Author'):
+        return (self.Name + self.Initials) == (other.Name + other.Initials)
+    
     def __repr__(self):
         return self.Name + ' ' + self.Initials
+    
+    def __add__(self, other: 'Author'):
+        new_affs = set(self.Affiliations) | set(other.Affiliations)
+        return Author(self.Name, self.Initials, Affiliations=new_affs)
+
+class AllAuthors:
+    def __init__(self):
+        self.storage: set[Author] = set()
+    
+    def add(self, author: Author):
+        if author in self.storage:
+            au_old = list(self.storage & {author})
+            if len(au_old) == 0:
+                self.storage.add(author)
+            else:
+                self.storage.add(author + au_old[0])
 
 @dataclass
 class PubYear:
@@ -32,7 +54,16 @@ class Affiliation:
             return False
         return self.Uni < other.Uni
 
-def parse_line_raw(reference: str):
+@dataclass
+class Publication:
+    Title: str
+    Year: PubYear
+    journal: str = None
+    Authors: list[Author] = field(default_factory=list)
+    DOI: str = None
+    extra: str = field(default=None, repr=False)
+
+def parse_line_raw(reference: str) -> list[str]:
     reference = reference.replace('\n', '')
     
     # Pattern to match authors, year, title, and the rest
@@ -73,13 +104,22 @@ def parse_line(line: str) -> tuple[list[Author], PubYear, str, str]:
     year = PubYear(Year=int(year[:4]), Letter=year[4:])
     return (authors, year, title, rest)
 
-def parse_lines(lines: list[str]) -> tuple[list]:
-    parsed = []
-    skipped = []
+def parse_publication(line: str) -> Publication:
+    authors, year, title, rest = parse_line_raw(line)
+    authors = split_authors(authors)
+    year = PubYear(Year=int(year[:4]), Letter=year[4:])
+    return Publication(Title=title, Year=year, Authors=authors, extra=rest)
+
+def parse_multiple(lines: list[str], parse_fun: Callable[[list[str]], tuple[list]]):
+    parsed: list[str] = []
+    skipped: list[str] = []
     for i, ch in enumerate(lines):
         ps = parse_line_raw(ch)
         if ps is None or len(ps[0]) == 0:
             skipped.append((i, ch))
         else:
-            parsed.append(parse_line(ch))
+            parsed.append(parse_fun(ch))
     return parsed, skipped
+
+parse_lines = partial(parse_multiple, parse_fun=parse_line)
+parse_publications = partial(parse_multiple, parse_fun=parse_publication)
