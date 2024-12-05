@@ -12,6 +12,3 @@
 *pyc
 __pycache__/*
 authors_meta/__pycache__/*
-
-# pickled data
-*.pkl
