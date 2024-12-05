@@ -31,8 +31,8 @@ def check_hit(crossref: list[dict], pub: dt.Publication) -> list[dict]:
         try:
             if pd['issued']['date-parts'][0][0] != pub.Year.Year:
                 continue
-            if pub.Title.lower() not in pd['title'][0].lower():
-                continue
+            # if pub.Title.lower() not in pd['title'][0].lower():
+            #     continue
 
             pub_authors = set([au.Name.lower() for au in pub.Authors])
             crossref_authors = set()

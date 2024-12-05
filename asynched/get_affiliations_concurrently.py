@@ -39,7 +39,7 @@ def fetch_async_timeout(fetch: Callable[[str], set[Affiliation]], timeout=20, pn
             for async_result in tqdm(processes):
                 try:
                     results.append(async_result.get(timeout=timeout))
-                except Exception as e:
+                except TimeoutError as e:
                     print(f"Timeout exceeded, skipping.")
                     results.append(None)
         return results
