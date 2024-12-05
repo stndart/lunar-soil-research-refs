@@ -5,6 +5,8 @@ import joblib
 from typing import Callable, Any
 from itertools import chain
 
+from multiprocessing.context import TimeoutError as MPTimeoutError
+
 import dt
 from authors_meta.parse_crossref import get_doi_pub, check_hit
 
@@ -38,7 +40,7 @@ def fetch_async_timeout(fetch: Callable[[dt.Publication], Any], timeout=20, pn=1
             for async_result in tqdm(processes):
                 try:
                     results.append(async_result.get(timeout=timeout))
-                except TimeoutError as e:
+                except MPTimeoutError as e:
                     print(f"Timeout exceeded, skipping.")
                     results.append(None)
         return results

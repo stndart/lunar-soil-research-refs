@@ -58,6 +58,24 @@ def update_authors_storage(storage: dt.AllAuthors, pub: dt.Publication):
             storage.add(dt.Author(Name=au['family'], Initials=au.get('given', ''), Affiliations=affs))
     return True
 
+def ref_to_authors(ref: dict) -> list[dt.Author]:
+    authors = []
+    for auref in ref:
+        affs = []
+        for aff in auref.get('affiliation', []):
+            affs.append(aff['name'])
+        authors.append(dt.Author(auref['family'], auref['given'], affs))
+    return authors
+
+def ref_to_pub(ref: dict) -> dt.Publication:
+    return dt.Publication(
+        Title=ref['title'][0],
+        Year=ref['published-print']['date-parts'][0][0],
+        Authors=ref_to_authors(ref['author']),
+        DOI=ref['DOI'],
+        extra=ref
+    )
+
 if __name__ == '__main__':
     pub = dt.Publication(Title='Gas analysis of the lunar surface', Year=dt.PubYear(Year=1970, Letter=''),
                          Authors=[

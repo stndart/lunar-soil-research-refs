@@ -27,12 +27,11 @@ class AllAuthors:
         self.storage: set[Author] = set()
     
     def add(self, author: Author):
-        if author in self.storage:
-            au_old = list(self.storage & {author})
-            if len(au_old) == 0:
-                self.storage.add(author)
-            else:
-                self.storage.add(author + au_old[0])
+        au_old = list(self.storage & {author})
+        if len(au_old) == 0:
+            self.storage.add(author)
+        else:
+            self.storage.add(author + au_old[0])
 
 @dataclass
 class PubYear:
