@@ -1,0 +1,17 @@
+# Wing IDE project
+*.wpr
+*.wpu
+
+# VSCode workspace
+*.code-workspace
+
+# vim and notepad++ files
+*.swp
+
+# precompiled python imports
+*pyc
+__pycache__/*
+authors_meta/__pycache__/*
+
+# pickled data
+*.pkl
